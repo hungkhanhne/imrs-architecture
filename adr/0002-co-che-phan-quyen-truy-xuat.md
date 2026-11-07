@@ -46,8 +46,8 @@ Tài liệu gọi đây là **lọc trong yêu cầu tìm kiếm**. Quyết đ�
 
 ## Nguồn
 
-- [`L1_PhanHungKhanh.pdf`](../../L1_PhanHungKhanh.pdf): UC04-UC07, QA02, BC03.
-- [`LAB2_MVC.docx`](../../LAB2_MVC.docx): `WebUIController`, `QueryOrchestrator`, `VectorDBConnector`, Qdrant.
-- [`LAB4_RAG_DESIGN.docx`](../../LAB4_RAG_DESIGN.docx): payload filter theo role, kiểm tra bổ sung và cache phân quyền.
+- `L1_PhanHungKhanh.pdf`: UC04-UC07, QA02, BC03.
+- `LAB2_MVC.docx`: `WebUIController`, `QueryOrchestrator`, `VectorDBConnector`, Qdrant.
+- `LAB4_RAG_DESIGN.docx`: bộ lọc payload theo vai trò, kiểm tra bổ sung và cache phân quyền.
 - [Tài liệu lọc Qdrant](https://qdrant.tech/documentation/search/filtering/): điều kiện payload và payload index.
 - [Cài đặt Qdrant](https://qdrant.tech/documentation/installation/): cấu hình bảo mật và API gRPC/HTTP.

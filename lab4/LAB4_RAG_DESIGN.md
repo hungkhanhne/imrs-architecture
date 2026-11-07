@@ -1,7 +1,7 @@
 # LAB 4 - Thiết kế RAG cho IMRS
 
 **Trạng thái:** Bản nháp do AI hỗ trợ; cần sinh viên rà soát trước khi nộp  
-**Tài liệu tham chiếu:** [`L1_PhanHungKhanh.pdf`](../../L1_PhanHungKhanh.pdf), [`LAB2_MVC.docx`](../../LAB2_MVC.docx), [`LAB3_DYNAMIC.docx`](../../LAB3_DYNAMIC.docx), [`LAB4_RAG_DESIGN.docx`](../../LAB4_RAG_DESIGN.docx) và [`SAD-Lab-Manual-v3.pdf`](../../SAD-Lab-Manual-v3.pdf)  
+**Tài liệu tham chiếu (giữ ngoài repo):** `L1_PhanHungKhanh.pdf`, `LAB2_MVC.docx`, `LAB3_DYNAMIC.docx`, `LAB4_RAG_DESIGN.docx` và `SAD-Lab-Manual-v3.pdf`  
 **Gói ngữ cảnh:** [`context-pack.md`](../context-pack.md)
 
 > Bản Word Lab 4 được dùng để đối chiếu cấu trúc drivers, các quyết định D1-D3 và tiêu chí tự rà soát. Các lựa chọn trong bản Word chưa được xem là xác nhận cá nhân của sinh viên. Bản thiết kế này chọn Qdrant nội bộ để thống nhất với `VectorDBConnector` và Qdrant đã có trong Lab 2; PostgreSQL tiếp tục lưu dữ liệu quan hệ và nhật ký. Các mục tiêu thời gian trong Lab 1 là mục tiêu đề xuất, chưa có kết quả benchmark.

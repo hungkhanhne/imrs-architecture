@@ -42,10 +42,10 @@ Mô hình embedding chạy cục bộ sau `EmbeddingService`. Chưa khóa tên m
 
 ## Nguồn
 
-- [`LAB2_MVC.docx`](../../LAB2_MVC.docx): `VectorDBConnector`, Qdrant và luồng gRPC/REST.
-- [`LAB4_RAG_DESIGN.docx`](../../LAB4_RAG_DESIGN.docx): bản tham khảo Lab 4 chọn Qdrant nội bộ, PostgreSQL cho quan hệ/audit.
-- [`L1_PhanHungKhanh.pdf`](../../L1_PhanHungKhanh.pdf): ràng buộc nội bộ, bảo mật, chi phí và tiến độ.
-- [`SAD-Lab-Manual-v3.pdf`](../../SAD-Lab-Manual-v3.pdf): yêu cầu Lab 4.
+- `LAB2_MVC.docx`: `VectorDBConnector`, Qdrant và luồng gRPC/REST.
+- `LAB4_RAG_DESIGN.docx`: bản tham khảo Lab 4 chọn Qdrant nội bộ, PostgreSQL cho quan hệ/audit.
+- `L1_PhanHungKhanh.pdf`: ràng buộc nội bộ, bảo mật, chi phí và tiến độ.
+- `SAD-Lab-Manual-v3.pdf`: yêu cầu Lab 4.
 - [Lọc dữ liệu Qdrant](https://qdrant.tech/documentation/search/filtering/): lọc payload và lập payload index.
 - [Cài đặt Qdrant](https://qdrant.tech/documentation/installation/): tùy chọn triển khai và lưu ý bảo mật/vận hành.
 - [README pgvector](https://github.com/pgvector/pgvector/blob/master/README.md#filtering): cosine và hành vi lọc khi dùng ANN.
