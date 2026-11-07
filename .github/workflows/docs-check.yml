@@ -1,0 +1,44 @@
+name: Kiểm tra cấu trúc tài liệu
+
+on:
+  push:
+    paths:
+      - "README.md"
+      - "AI_LOG.md"
+      - "context-pack.md"
+      - "adr/**"
+      - "lab4/**"
+      - "lab5/**"
+      - "lab6/**"
+      - "docs/**"
+      - ".github/workflows/docs-check.yml"
+  pull_request:
+    paths:
+      - "README.md"
+      - "AI_LOG.md"
+      - "context-pack.md"
+      - "adr/**"
+      - "lab4/**"
+      - "lab5/**"
+      - "lab6/**"
+      - "docs/**"
+      - ".github/workflows/docs-check.yml"
+
+jobs:
+  structure:
+    name: Kiểm tra các tài liệu bắt buộc
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lấy mã nguồn
+        uses: actions/checkout@v4
+      - name: Kiểm tra cấu trúc kho
+        run: |
+          test -f README.md
+          test -f AI_LOG.md
+          test -f context-pack.md
+          test -f adr/0001-chon-vector-store.md
+          test -f adr/0002-co-che-phan-quyen-truy-xuat.md
+          test -f lab4/LAB4_RAG_DESIGN.md
+          test -f lab5/LAB5_C4_SERVING.md
+          test -f lab6/LAB6_EVALUATION_REPORT.md
+          test -f docs/SAD.md
