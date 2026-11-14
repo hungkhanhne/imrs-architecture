@@ -6,7 +6,7 @@
 
 ## Quyết định
 
-`AccessPolicy` lấy principal và role từ phiên đã được xác thực ở phía máy chủ; không tin role do trình duyệt gửi. Trên cache miss, `VectorDBConnector` gửi tìm kiếm đến Qdrant cùng điều kiện payload `allowed_roles` được tạo từ role đã xác minh. Payload quyền được tạo từ nguồn quản trị tin cậy và có chỉ mục cho trường lọc.
+`AccessPolicy` lấy principal và role từ phiên đã được xác thực ở phía máy chủ; không tin role do trình duyệt gửi. Khi cần truy xuất, `VectorDBConnector` gửi tìm kiếm đến Qdrant cùng điều kiện payload `allowed_roles` được tạo từ role đã xác minh. Payload quyền được tạo từ nguồn quản trị tin cậy; payload index cho `allowed_roles` được tạo trước ingestion theo hướng dẫn Qdrant.
 
 Sau khi nhận kết quả, IMRS Backend kiểm tra lại metadata quyền của từng đoạn trước khi đoạn được đưa vào prompt hoặc cache. Nếu danh tính không hợp lệ hoặc không có role được phép, hệ thống từ chối theo hướng fail-closed và ghi sự kiện audit không có câu hỏi/nội dung bệnh án thô. Cache key bao gồm tối thiểu dấu vân tay câu hỏi, role, phiên bản chính sách và phiên bản corpus.
 

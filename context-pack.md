@@ -11,7 +11,7 @@ Lab 2: Web App → API Gateway → backend Python/FastAPI (`WebUIController`, `Q
 ## Ràng buộc Lab 1
 
 - Dữ liệu, câu hỏi, vector, prompt và suy luận ở trong mạng bệnh viện; không gọi dịch vụ công cộng.
-- Mục tiêu hạ tầng: máy chủ nội bộ, một RTX 4090 24 GB; ngân sách <=15.000 USD; thời hạn bốn tháng.
+- Mục tiêu hạ tầng: máy chủ nội bộ, một RTX 4090 24 GB dùng chung cho LLM/embedding; Lab 5 dự kiến thêm tóm tắt bệnh án. Ngân sách <=15.000 USD; thời hạn bốn tháng.
 - 100 kết nối đồng thời; TTFT <1,5 giây là mục tiêu đề xuất cần đo.
 - Chặn/ghi log tấn công SQL hoặc prompt injection; mục tiêu rò rỉ PII 0% trong bộ kiểm thử.
 - LLM chính lỗi: chuyển sang bản dự phòng ngoại tuyến, không làm sập ứng dụng; phục hồi <=5 giây là mục tiêu đề xuất cần kiểm chứng.
@@ -19,7 +19,7 @@ Lab 2: Web App → API Gateway → backend Python/FastAPI (`WebUIController`, `Q
 
 ## RAG và quyết định hiện tại
 
-Nạp PDF → trích xuất → chia đoạn → embedding cục bộ → Qdrant lưu vector cùng nguồn/trang/`allowed_roles`. Khi hỏi, máy chủ xác minh role, lọc payload trong yêu cầu tìm kiếm, kiểm tra quyền lần hai, làm sạch ngữ cảnh, gọi LLM nội bộ và trả trích dẫn. `AuditLogger` ghi quyết định/ID nguồn vào PostgreSQL, không ghi nội dung thô. Cache phân vùng theo role, phiên bản chính sách và corpus.
+Nạp PDF → trích xuất → chia đoạn → embedding cục bộ → Qdrant lưu vector cùng nguồn/trang/`allowed_roles`. Một `EmbeddingService` logic dùng cùng model/phiên bản ở ingestion và query. Tạo payload index cho `allowed_roles` trước ingestion. Khi hỏi, máy chủ xác minh role, lọc payload trong yêu cầu tìm kiếm, kiểm tra quyền lần hai, làm sạch ngữ cảnh, gọi LLM nội bộ và trả trích dẫn. `AuditLogger` ghi quyết định/ID nguồn vào PostgreSQL, không ghi nội dung thô. Cache phân vùng theo role, phiên bản chính sách và corpus.
 
 - **D1:** Qdrant nội bộ theo Lab 2; PostgreSQL giữ dữ liệu quan hệ và audit.
 - **D2:** embedding đa ngôn ngữ cục bộ qua `EmbeddingService`; chưa chọn model cụ thể.

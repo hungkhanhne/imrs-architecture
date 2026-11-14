@@ -8,7 +8,7 @@
 
 Chọn Qdrant tự triển khai trong hạ tầng nội bộ làm kho vector RAG. `VectorDBConnector` là lớp truy cập duy nhất từ IMRS Backend; connector gửi vector, điều kiện payload `allowed_roles` và số lượng kết quả cần lấy. PostgreSQL tiếp tục lưu dữ liệu quan hệ và bảng `AILog`, không chuyển sang lưu vector trong quyết định này.
 
-Mô hình embedding chạy cục bộ sau `EmbeddingService`. Chưa khóa tên mô hình, chiều vector, cấu hình chỉ mục hoặc quy mô phần cứng Qdrant vì tài liệu hiện có không đưa ra benchmark tương ứng.
+Mô hình embedding chạy cục bộ sau một `EmbeddingService` logic dùng chung cho ingestion và query; hai luồng phải dùng cùng `model_id`/phiên bản. Chưa khóa tên mô hình, chiều vector, cấu hình chỉ mục hoặc quy mô phần cứng Qdrant vì tài liệu hiện có không đưa ra benchmark tương ứng.
 
 ## Các phương án đã cân nhắc
 
@@ -28,6 +28,7 @@ Mô hình embedding chạy cục bộ sau `EmbeddingService`. Chưa khóa tên m
 ### Tiêu cực và rủi ro
 
 - Thêm một dịch vụ cần theo dõi và vận hành riêng bên cạnh PostgreSQL, API Gateway, RabbitMQ và các thành phần Lab 2-3.
+- Embedding và LLM cùng dùng GPU RTX 4090 mục tiêu; tác vụ dự kiến ở Lab 5 làm tăng khả năng tranh chấp tài nguyên, cần benchmark chung.
 - Tự triển khai không tự đảm bảo an toàn; phải cấu hình xác thực/mạng, lưu trữ, backup/restore, giám sát và log.
 - Tài nguyên CPU/RAM/đĩa và độ trễ chưa được đo cho corpus, payload và tải IMRS.
 - Thay mô hình embedding cần nhúng lại tài liệu và tạo lại dữ liệu/vector có cùng không gian embedding.
@@ -36,7 +37,7 @@ Mô hình embedding chạy cục bộ sau `EmbeddingService`. Chưa khóa tên m
 ## Việc cần làm tiếp
 
 1. Tạo payload index cho `allowed_roles` trước khi nạp dữ liệu, theo hướng dẫn Qdrant.
-2. Đo recall, độ trễ, tài nguyên và hành vi lọc trên corpus thử nghiệm không chứa PII thật.
+2. Đo recall, độ trễ, tài nguyên GPU dùng chung và hành vi lọc trên corpus thử nghiệm không chứa PII thật.
 3. Kiểm tra cấu hình mạng, xác thực, backup/restore, monitoring và quyền truy cập của connector.
 4. Xem xét lại ADR nếu PostgreSQL sẵn có có năng lực đã được xác nhận và benchmark cho thấy pgvector đáp ứng tải/ACL tốt hơn.
 

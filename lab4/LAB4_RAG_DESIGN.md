@@ -19,11 +19,11 @@ Cột `Nguồn` dùng đúng ba nhãn của bài lab. Các dòng hiện là đ�
 | ASR-1 | Hiệu năng | Với kịch bản 100 kết nối đồng thời, mục tiêu TTFT dưới 1,5 giây. | QA01 trong Lab 1, tr. 5-6; báo cáo ghi đây là mục tiêu đề xuất cần xác nhận và đo. | Cao; cần benchmark | AI đề xuất – giữ nguyên |
 | ASR-2 | Bảo mật | Quyền bác sĩ được lấy từ danh tính đã xác thực phía máy chủ; truy vấn vector chỉ trả về đoạn thỏa bộ lọc quyền. | UC05, QA02 và BC03 trong Lab 1; cơ chế kiểm soát truy cập Lab 4. | Bắt buộc | AI đề xuất – giữ nguyên |
 | ASR-3 | Bảo mật | Phát hiện, chặn và ghi nhật ký các tình huống SQL injection/prompt injection trong bộ kiểm thử; mục tiêu rò rỉ PII là 0% trong các tình huống đó. | QA02 và BC03 trong Lab 1, tr. 6-7. Đây là mục tiêu kiểm thử, không phải bảo đảm đã đạt. | Bắt buộc | AI đề xuất – giữ nguyên |
-| ASR-4 | Khả dụng | Khi LLM nội bộ chính lỗi, chuyển sang mô hình dự phòng ngoại tuyến mà không làm sập ứng dụng; mục tiêu phục hồi không quá 5 giây. | QA03 trong Lab 1, tr. 6; mốc 5 giây là đề xuất cần xác nhận bằng thử nghiệm. | Cao; cần benchmark | AI đề xuất – giữ nguyên |
-| ASR-5 | Khả năng sửa đổi | Có thể thay mô hình embedding sau `EmbeddingService`; lưu phiên bản mô hình và lập kế hoạch nhúng lại dữ liệu khi đổi mô hình. | Yêu cầu khả năng sửa đổi trong Lab 4, tr. 9; bản Word Lab 4 gợi ý driver này. | Trung bình | AI đề xuất – giữ nguyên |
+| ASR-4 | Khả dụng | Khi LLM nội bộ chính lỗi, phân hệ tiếp tục hoạt động và chuyển sang mô hình dự phòng ngoại tuyến; mục tiêu phục hồi không quá 5 giây. Lab 4 ghi nhận yêu cầu, cơ chế triển khai chi tiết thuộc Lab 5. | QA03 trong Lab 1, tr. 6; mốc 5 giây là mục tiêu đề xuất cần xác nhận bằng thử nghiệm. | Trung bình; chi tiết triển khai ở Lab 5 | AI đề xuất – giữ nguyên |
+| ASR-5 | Khả năng sửa đổi | Có thể thay mô hình embedding sau `EmbeddingService`; ingestion và truy vấn dùng cùng mô hình/phiên bản; khi đổi mô hình phải nhúng lại toàn kho vì vector thuộc các không gian khác nhau. | Yêu cầu khả năng sửa đổi trong Lab 4, tr. 9; bản Word Lab 4 nêu rõ hệ quả re-embedding. | Trung bình | AI đề xuất – giữ nguyên |
 | ASR-6 | Khả năng kiểm toán | Ghi quyết định cho phép/từ chối, mã người dùng phù hợp chính sách và ID nguồn đã dùng; không ghi câu hỏi hoặc nội dung bệnh án thô vào nhật ký. | UC06, QA02, BC03 trong Lab 1; `AuditLogger` trong Lab 4. | Cao | AI đề xuất – giữ nguyên |
 | CON-1 | Ràng buộc dữ liệu | Tài liệu, truy vấn, vector, prompt và suy luận phải ở trong mạng bệnh viện; không gửi dữ liệu lên dịch vụ công cộng. | TC01, TC03 và BC03 trong Lab 1; Lab 4, tr. 8. | Bắt buộc | AI đề xuất – giữ nguyên |
-| CON-2 | Ràng buộc hạ tầng | Môi trường mục tiêu có cụm máy chủ nội bộ và một GPU RTX 4090 với 24 GB VRAM. | Bối cảnh Lab 1, tr. 2. Đây là cấu hình mục tiêu, không phải yêu cầu máy làm bài lab. | Bắt buộc | AI đề xuất – giữ nguyên |
+| CON-2 | Ràng buộc hạ tầng | Môi trường mục tiêu có cụm máy chủ nội bộ và một GPU RTX 4090 với 24 GB VRAM. Embedding RAG dùng chung tài nguyên GPU với LLM; Lab 5 còn dự kiến tác vụ tóm tắt. | Bối cảnh Lab 1, tr. 2; bản Word Lab 4 nhắc đến chia sẻ GPU giữa các mô hình. Đây là cấu hình mục tiêu, không phải yêu cầu máy làm bài lab. | Bắt buộc | AI đề xuất – giữ nguyên |
 | CON-3 | Ràng buộc kinh doanh | Ngân sách dự án không quá 15.000 USD. | BC01 trong Lab 1, tr. 2. | Bắt buộc | AI đề xuất – giữ nguyên |
 | CON-4 | Ràng buộc tiến độ | Hoàn thành triển khai và kiểm thử lâm sàng trong bốn tháng. | BC02 trong Lab 1, tr. 2. | Bắt buộc | AI đề xuất – giữ nguyên |
 
@@ -43,7 +43,7 @@ Các nhận định dưới đây là so sánh định tính, không phải số
 
 | Phương án | Tốc độ và vận hành | Bảo mật / PII | Khả năng thay đổi | Kết luận |
 |---|---|---|---|---|
-| Mô hình đa ngôn ngữ chạy nội bộ | Dùng chung tài nguyên GPU với LLM; phải đo VRAM, độ trễ và chất lượng tiếng Việt/y khoa. | PDF và câu hỏi không rời mạng bệnh viện. | Đặt sau `EmbeddingService`; lưu `model_id`, phiên bản và số chiều. Đổi mô hình cần nhúng lại dữ liệu và kiểm tra chất lượng truy xuất. | **Chọn**; chưa khóa tên model vì tài liệu Lab không quy định. |
+| Mô hình đa ngôn ngữ chạy nội bộ | Dùng chung GPU với LLM và tác vụ dự kiến ở Lab 5; phải đo VRAM, tranh chấp tài nguyên, độ trễ và chất lượng tiếng Việt/y khoa. | PDF và câu hỏi không rời mạng bệnh viện. | Một `EmbeddingService` logic dùng cùng `model_id`/phiên bản cho ingestion và truy vấn. Đổi mô hình cần nhúng lại toàn kho và kiểm tra chất lượng truy xuất. | **Chọn**; chưa khóa tên model vì tài liệu Lab không quy định. |
 | API embedding trên đám mây | Có thể giảm phần vận hành mô hình cục bộ; chưa có benchmark hoặc báo giá để xác nhận lợi ích. | Phải gửi PDF hoặc câu hỏi ra ngoài mạng, trái CON-1. | Phụ thuộc nhà cung cấp và kết nối ngoài. | **Loại** vì CON-1. |
 
 ### D3 - Phân quyền khi truy xuất
@@ -72,7 +72,7 @@ Lọc sau truy vấn rủi ro hơn vì đoạn trái quyền đã sang ứng d�
 
 ## 3. Sơ đồ kiến trúc RAG
 
-Sơ đồ kế thừa các tên và ranh giới đã có trong Lab 2: Web App/View, API Gateway, IMRS Backend/FastAPI, `WebUIController`, `QueryOrchestrator`, `VectorDBConnector`, `RelationalDBConnector`, PostgreSQL và Qdrant. Luồng xử lý âm thanh bất đồng bộ qua RabbitMQ/`TranscriptionWorker` của Lab 3 không được đưa vào luồng truy vấn văn bản RAG này; nó vẫn là luồng riêng. Qdrant nhận lọc payload trong yêu cầu tìm kiếm; ứng dụng kiểm tra quyền lại trước khi dùng đoạn truy xuất. PostgreSQL lưu audit log, không lưu vector RAG trong quyết định D1 này.
+Sơ đồ kế thừa các tên và ranh giới đã có trong Lab 2: Web App/View, API Gateway, IMRS Backend/FastAPI, `WebUIController`, `QueryOrchestrator`, `VectorDBConnector`, `RelationalDBConnector`, PostgreSQL và Qdrant. Hai nút `EmbeddingService` trên flow thể hiện cùng một dịch vụ logic được gọi ở ingestion và query; cả hai phải dùng cùng model/phiên bản để vector tài liệu và câu hỏi tương thích. Luồng xử lý âm thanh bất đồng bộ qua RabbitMQ/`TranscriptionWorker` của Lab 3 không được đưa vào luồng truy vấn văn bản RAG này; nó vẫn là luồng riêng. Qdrant nhận lọc payload trong yêu cầu tìm kiếm; payload index cho `allowed_roles` được tạo trước ingestion; ứng dụng kiểm tra quyền lại trước khi dùng đoạn truy xuất. PostgreSQL lưu audit log, không lưu vector RAG trong quyết định D1 này.
 
 ![Sơ đồ kiến trúc RAG](images/rag-flow.png)
 
@@ -81,7 +81,7 @@ flowchart LR
   subgraph ING["Nạp tài liệu - trong mạng bệnh viện"]
     PDF["PDF phác đồ nội bộ"] -->|"Đọc tệp nội bộ"| PARSE["DocumentParser"]
     PARSE -->|"Văn bản + nguồn/trang"| CHUNK["Chunker<br/>gắn allowed_roles tin cậy"]
-    CHUNK -->|"Đoạn văn bản"| EMBI["EmbeddingService<br/>mô hình cục bộ"]
+    CHUNK -->|"Đoạn văn bản"| EMBI["EmbeddingService dùng chung<br/>model/version dùng cho query"]
     EMBI -->|"Vector + payload"| VCI["VectorDBConnector"]
     VCI -->|"gRPC: upsert"| QDR["Qdrant nội bộ<br/>vector + payload + chỉ mục quyền"]
   end
@@ -96,7 +96,7 @@ flowchart LR
     QO -->|"tra cứu khóa theo role/policy/corpus"| CACHE["ResponseCache"]
     CACHE -->|"kết quả có trích dẫn / không có trong cache"| QO
     QO -->|"câu hỏi"| RED["PIIRedactor"]
-    RED -->|"câu hỏi đã làm sạch"| EMBQ["EmbeddingService"]
+    RED -->|"câu hỏi đã làm sạch"| EMBQ["EmbeddingService dùng chung<br/>cùng model/version"]
     EMBQ -->|"vector truy vấn"| VCQ["VectorDBConnector"]
     VCQ -->|"gRPC: vector + bộ lọc role + top-k"| QDR
     QDR -->|"đoạn phù hợp + nguồn/trang"| VCQ
@@ -133,7 +133,7 @@ sequenceDiagram
   participant AP as AccessPolicy
   participant Cache as ResponseCache
   participant Red as PIIRedactor
-  participant Embed as EmbeddingService
+  participant Embed as EmbeddingService (cùng model/version với ingestion)
   participant VC as VectorDBConnector
   participant Qdrant as Qdrant nội bộ
   participant Check as Kiểm tra quyền ứng dụng
@@ -214,6 +214,8 @@ sequenceDiagram
 | Sơ đồ cũ chưa thể hiện rõ quyền cache. | Cache không scope theo role/policy/corpus có thể làm lộ kết quả giữa nhóm người dùng. | Thêm role, policy version và corpus version vào khóa cache; kiểm tra quyền trước cả cache hit. |
 | Luồng RAG văn bản có thể bị nhầm với xử lý âm thanh Lab 3. | Lab 3 mô tả RabbitMQ và `TranscriptionWorker` bất đồng bộ; đó không phải chuỗi truy vấn văn bản RAG. | Ghi rõ hai luồng riêng; không thêm RabbitMQ/worker vào sơ đồ RAG này. |
 | Luồng lỗi mô hình nội bộ chưa có nhánh dự phòng. | Lab 1 có yêu cầu chuyển sang LLM dự phòng ngoại tuyến. | Bổ sung `LLM Serving Gateway` định tuyến mô hình chính/dự phòng; mốc <=5 giây vẫn là mục tiêu cần đo. |
+| Hai nút `EmbeddingService` có thể bị hiểu là hai dịch vụ khác nhau. | Ingestion và query cần dùng cùng mô hình/phiên bản để vector nằm trong cùng không gian. | Ghi rõ hai nút là cùng một dịch vụ logic; đổi mô hình cần re-embedding toàn kho. |
+| Ràng buộc một GPU chưa thể hiện tranh chấp tài nguyên. | LLM và embedding cùng dùng RTX 4090; Lab 5 còn có tác vụ tóm tắt dự kiến. | Bổ sung chia sẻ tài nguyên vào CON-2 và tiêu chí benchmark của D2; không đặt thêm ngưỡng VRAM/độ trễ. |
 
 ## 6. Quyết định và điều kiện cần rà soát
 

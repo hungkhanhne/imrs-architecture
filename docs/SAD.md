@@ -12,7 +12,9 @@ IMRS hỗ trợ nhân viên y tế tra cứu hồ sơ và phác đồ. Tính nă
 - **Backend:** Python/FastAPI với `WebUIController`, `QueryOrchestrator`, `PIIRedactor`, `VectorDBConnector`, `RelationalDBConnector`.
 - **Kho quan hệ:** PostgreSQL cho dữ liệu quan hệ và `AILog`.
 - **Kho vector:** Qdrant nội bộ cho vector RAG và payload nguồn/quyền.
+- **Mô hình embedding:** một `EmbeddingService` logic dùng chung cho ingestion và query; cả hai dùng cùng model/phiên bản. Khi đổi model cần nhúng lại toàn kho.
 - **LLM:** LLM Serving Gateway định tuyến mô hình nội bộ chính hoặc dự phòng; trả câu trả lời dạng streaming.
+- **Tài nguyên AI:** LLM và embedding dùng chung GPU RTX 4090 24 GB; Lab 5 dự kiến bổ sung tác vụ tóm tắt, nên cần đo tranh chấp tài nguyên.
 - **Xử lý âm thanh:** RabbitMQ và `TranscriptionWorker` theo luồng bất đồng bộ Lab 3; tách biệt với truy vấn văn bản RAG.
 
 ## Ranh giới bảo mật RAG
