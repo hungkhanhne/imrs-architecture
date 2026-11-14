@@ -1,4 +1,4 @@
-# Gói ngữ cảnh IMRS - Lab 4
+# Gói ngữ cảnh IMRS - Lab 4 và Lab 5
 
 > Tóm tắt Lab 1-3, Word Lab 4 tham khảo và manual SAD. Tài liệu nguồn nằm cạnh thư mục `imrs-architecture/`.
 
@@ -25,6 +25,16 @@ Nạp PDF → trích xuất → chia đoạn → embedding cục bộ → Qdrant
 - **D2:** embedding đa ngôn ngữ cục bộ qua `EmbeddingService`; chưa chọn model cụ thể.
 - **D3:** lọc role trong yêu cầu vector, rồi kiểm tra quyền lần hai ở ứng dụng.
 
+## Lab 5 — serving baseline có điều kiện
+
+- `LLM Serving Gateway` định tuyến tới Primary/Fallback nội bộ; Fallback trả `degraded=true` để giao diện hiển thị chế độ suy giảm.
+- Cấu hình khởi điểm trong ADR-0003: batch tối đa 4, `MAX_WAIT_TIME=50 ms`; queue có giới hạn nhưng giới hạn cụ thể và hành vi khi đầy cần xác định bằng thử tải.
+- `CircuitBreaker` dùng Closed/Open/Half-Open; retry có giới hạn khi Closed, Open không gọi Primary, Half-Open chỉ cho một probe đồng thời. Timeout, failure threshold và reset timeout chưa có số đo.
+- Một RTX 4090 24 GB dùng chung cho LLM và `EmbeddingService`; cùng model/version embedding được dùng ở ingestion/query. Tóm tắt bệnh án cũng dự kiến dùng tài nguyên AI này.
+- Tốc độ đến giả định `100/30 ≈ 3,333 req/s`; thời gian GPU batch 1/4/8 là 0,4/0,6/0,9 giây. Đây là dữ liệu đề bài, không phải benchmark.
+- `μ=B/t(B)` và `ρ=λ/μ` chỉ mô tả năng lực theo giả định batch đầy. `MAX_WAIT+t(B)` không phải TTFT hoặc độ trễ tối thiểu; mô hình nội suy `B*` không phải bằng chứng queue ổn định.
+- Khi kiểm tra tải, đưa chung RAG, tóm tắt và embedding vào cùng kịch bản. Đo TTFT, queue depth, từ chối, fallback và tài nguyên GPU; chưa có kết quả đo trong baseline này.
+
 ## Còn cần xác định
 
-Embedding model/phiên bản, kích thước chunk, top-k, TTL cache, cấu hình Qdrant, benchmark tải và quy trình cập nhật/thu hồi quyền. Mục tiêu thời gian Lab 1 chưa phải kết quả đo.
+Embedding model/phiên bản, kích thước chunk, top-k, TTL cache, cấu hình Qdrant, queue capacity, SLO và benchmark tải, timeout/threshold của breaker, năng lực Fallback, quy trình cập nhật/thu hồi quyền. Mục tiêu thời gian Lab 1 chưa phải kết quả đo.
