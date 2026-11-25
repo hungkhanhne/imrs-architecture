@@ -1,11 +1,7 @@
 # LAB 6 — Đánh giá kiến trúc hệ đa tác nhân CAAN theo ATAM rút gọn
 
 > **Phạm vi:** Đánh giá kiến trúc đề xuất trong tài liệu Lab 6 và các ràng buộc IMRS đã ghi trong `context-pack.md`, Lab 4 và Lab 5. Đây là đánh giá thiết kế; không có triển khai hoặc benchmark mới trong báo cáo này. Không dùng dữ liệu bệnh nhân thật.
->
-> **Cách dùng bản tham khảo:** `LAB6_EVALUATION_REPORT.docx` là bản nháp do AI soạn, không phải biên bản phân tích của nhóm. Báo cáo này hợp nhất các điểm phù hợp với đề và baseline repo, sửa các khẳng định quá chắc chắn, đồng thời đánh dấu những kết luận chỉ nhóm mới có thể xác nhận (đặc biệt là nhóm phát hiện trước hay sau khi hỏi AI). Không coi nhãn `[NHÓM XÁC NHẬN]` trong tài liệu nguồn là xác nhận đã có.
->
-> **Thông tin sinh viên:** Bổ sung tên, MSSV, lớp và phân công vai trò nếu giảng viên yêu cầu.
-
+> 
 ## 1. Phạm vi và kiến trúc ban đầu
 
 Clinical Assistant Agent Network (CAAN) là tính năng trợ lý hành chính lâm sàng đa tác nhân thuộc IMRS. Bác sĩ gửi yêu cầu tổng hợp; `OrchestratorAgent` dùng LLM lập kế hoạch, gọi tuần tự `SummaryAgent`, `DrugInteractionAgent`, `SchedulingAgent` và lặp đến khi LLM trả “hoàn thành”. `SummaryAgent` đưa nguyên văn đoạn lấy từ RAG vào prompt; `SchedulingAgent` ghi lịch ngay; `DataAnalysisAgent` chạy mã Python do LLM tạo trên máy chủ ứng dụng bằng tài khoản dịch vụ backend. Mọi agent dùng chung Redis với khóa `task:<id>`.
