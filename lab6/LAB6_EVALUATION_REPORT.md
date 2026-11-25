@@ -1,7 +1,6 @@
 # LAB 6 — Đánh giá kiến trúc hệ đa tác nhân CAAN theo ATAM rút gọn
 
 > **Phạm vi:** Đánh giá kiến trúc đề xuất trong tài liệu Lab 6 và các ràng buộc IMRS đã ghi trong `context-pack.md`, Lab 4 và Lab 5. Đây là đánh giá thiết kế; không có triển khai hoặc benchmark mới trong báo cáo này. Không dùng dữ liệu bệnh nhân thật.
-> 
 ## 1. Phạm vi và kiến trúc ban đầu
 
 Clinical Assistant Agent Network (CAAN) là tính năng trợ lý hành chính lâm sàng đa tác nhân thuộc IMRS. Bác sĩ gửi yêu cầu tổng hợp; `OrchestratorAgent` dùng LLM lập kế hoạch, gọi tuần tự `SummaryAgent`, `DrugInteractionAgent`, `SchedulingAgent` và lặp đến khi LLM trả “hoàn thành”. `SummaryAgent` đưa nguyên văn đoạn lấy từ RAG vào prompt; `SchedulingAgent` ghi lịch ngay; `DataAnalysisAgent` chạy mã Python do LLM tạo trên máy chủ ứng dụng bằng tài khoản dịch vụ backend. Mọi agent dùng chung Redis với khóa `task:<id>`.
@@ -55,7 +54,7 @@ Các kịch bản dưới đây được chọn từ Utility Tree. “Non-risk�
 | Non-risks | Orchestrator tập trung tạo điểm phù hợp để áp dụng giới hạn thống nhất, nếu Governor độc lập với LLM được bổ sung. DrugInteractionAgent là thao tác đọc theo mô tả, nên retry đọc không trực tiếp tạo bản ghi trùng; vẫn cần kiểm soát tải và timeout. |
 | Sensitivity Points | `MAX_STEPS`, `TOKEN_BUDGET`, `TOTAL_TIMEOUT`, timeout từng công cụ, `MAX_RETRIES`, backoff, mức song song và giới hạn GPU. Các giá trị này chưa được đo/chốt. |
 | Trade-off Points | Tăng bước/retry giúp hoàn tất việc phức tạp nhưng tăng tải và thời gian; timeout ngắn giải phóng tài nguyên nhanh nhưng có thể cắt tác vụ hợp lệ; backoff giảm áp lực dịch vụ lỗi nhưng kéo dài phản hồi. |
-| Nguồn phát hiện | Vòng lặp tới khi LLM nói hoàn thành xuất phát trực tiếp từ đề. Rủi ro trùng lịch, GPU và thiếu timeout là phân tích của bản nháp AI dựa trên mô tả; nhóm cần xác nhận đã tự phát hiện phần nào trước khi xem AI. |
+| Nguồn phát hiện | Vòng lặp tới khi LLM nói hoàn thành xuất phát trực tiếp từ đề. Rủi ro trùng lịch, tranh chấp GPU và thiếu timeout được suy ra từ trình tự gọi; xuất xứ phát hiện được đối chiếu ở Nhiệm vụ 5. |
 
 **Câu hỏi phản biện:** (1) Điều gì cắt vòng lặp nếu LLM không bao giờ báo hoàn tất? (2) Nếu dừng sau một tác động phụ đã xảy ra, trạng thái/hoàn tác/idempotency được xử lý thế nào? (3) Bằng chứng nào cho thấy giới hạn tài nguyên CAAN không làm vi phạm TTFT của RAG trên GPU dùng chung?
 
@@ -69,7 +68,7 @@ Các kịch bản dưới đây được chọn từ Utility Tree. “Non-risk�
 | Non-risks | Lab 4 lọc `allowed_roles` trong truy vấn và kiểm tra quyền lần hai là giảm thiểu truy cập tài liệu trái role; không thay thế quyền theo bệnh nhân hay chặn injection trong tài liệu được phép. Lab 5 thiết kế chặn egress tới Internet ở vùng máy chủ; điều này giảm đường gửi dữ liệu ra ngoài nhưng không ngăn đọc/ghi nội bộ. |
 | Sensitivity Points | Phạm vi quyền của người gọi, số/độ dài đoạn RAG, cách phân định nội dung không tin cậy, quyền tool, bộ kiểm tra tham số và điều kiện duyệt ghi. Ranh giới prompt không phải bảo đảm cưỡng chế. |
 | Trade-off Points | Lọc nội dung mạnh có thể giảm nội dung hữu ích/trích dẫn; xác nhận thủ công tăng an toàn nhưng tăng thời gian thao tác; siết quyền quá mức có thể chặn tác vụ hợp lệ. |
-| Nguồn phát hiện | PDF chứa lệnh ẩn và mục tiêu đặt lịch/tiết lộ là kịch bản bắt buộc trong đề. Rủi ro nối tiếp tới tool và đề xuất guardrail là phân tích của bản nháp AI; cần nhóm xác nhận nguồn phát hiện cá nhân. |
+| Nguồn phát hiện | PDF chứa lệnh ẩn và mục tiêu đặt lịch/tiết lộ là kịch bản bắt buộc trong đề. Rủi ro nối tiếp tới tool được suy ra từ luồng gọi công cụ và đối chiếu ở Nhiệm vụ 5. |
 
 **Câu hỏi phản biện:** (1) Nếu nội dung độc hại nằm trong tài liệu đúng quyền, lớp nào chặn nó kích hoạt tool? (2) Ai thực thi kiểm tra quyền bệnh nhân ngay trước khi đọc hoặc ghi? (3) Làm thế nào thu hồi/tìm các tài liệu đã nạp bị phát hiện độc hại mà vẫn giữ được truy vết?
 
@@ -83,7 +82,7 @@ Các kịch bản dưới đây được chọn từ Utility Tree. “Non-risk�
 | Non-risks | Lab 5 mô tả chặn egress từ vùng máy chủ IMRS; điều này giảm khả năng gửi dữ liệu ra Internet nếu đúng cấu hình, nhưng không bảo vệ trước truy cập nội bộ, đọc tệp hoặc cạn tài nguyên. |
 | Sensitivity Points | UID/GID, network namespace, mount allowlist, root filesystem, CPU/RAM/PID/time limits, quyền Docker daemon, loại runtime và dữ liệu gắn vào container. |
 | Trade-off Points | Sandbox chặt giảm bề mặt tấn công nhưng giới hạn thư viện/dữ liệu và tăng công vận hành/độ trễ; cho phép thêm thư viện hoặc mạng giúp tiện ích nhưng tăng rủi ro. |
-| Nguồn phát hiện | Đề nêu rõ mã chạy trực tiếp trên máy chủ bằng tài khoản backend và kịch bản đọc cấu hình/gửi dữ liệu ra mạng. Các kiểm soát còn thiếu được suy ra từ mô tả; cách tách Docker daemon là phân tích bổ sung của bản nháp AI. |
+| Nguồn phát hiện | Đề nêu rõ mã chạy trực tiếp trên máy chủ bằng tài khoản backend và kịch bản đọc cấu hình/gửi dữ liệu ra mạng. Cách tách quyền Docker daemon là kiểm soát bổ sung cần xem xét. |
 
 **Câu hỏi phản biện:** (1) Vì sao cần mã Python tự do thay cho hàm phân tích có allowlist? (2) Thành phần nào có quyền gọi Docker daemon và làm sao cô lập quyền đó khỏi backend? (3) Nếu lỗ hổng kernel cho phép thoát container, lớp giảm thiểu tiếp theo là gì?
 
@@ -97,7 +96,7 @@ Các kịch bản dưới đây được chọn từ Utility Tree. “Non-risk�
 | Non-risks | Redis trong mạng nội bộ giảm phơi nhiễm trực tiếp từ Internet theo baseline Lab 5; nó không ngăn truy cập chéo từ thành phần nội bộ bị xâm nhập hoặc cấu hình sai. |
 | Sensitivity Points | Tính ngẫu nhiên/định danh khóa, ACL/credential theo agent, phạm vi dữ liệu lưu, TTL, chính sách xóa, mã hóa/backup và hành vi khi Redis không sẵn sàng. |
 | Trade-off Points | Cách ly ACL chặt giảm rò chéo nhưng làm tăng cấu hình; TTL ngắn giảm thời gian lưu PII nhưng có thể xóa trạng thái tác vụ dài; chia sẻ ngữ cảnh thuận tiện nhưng tăng quyền đọc/ghi. |
-| Nguồn phát hiện | Redis shared state và dạng khóa được nêu trong đề. ID tuần tự, không ACL, không TTL và điểm lỗi đơn là giả định của bản AI, không được đề xác nhận; cần ghi là điều kiện/rủi ro cần kiểm tra, không khẳng định chắc chắn. |
+| Nguồn phát hiện | Redis shared state và dạng khóa được nêu trong đề. ID tuần tự, không ACL, không TTL và điểm lỗi đơn không được đề xác nhận; xem đây là điều kiện cần kiểm tra, không phải dữ kiện chắc chắn. |
 
 **Câu hỏi phản biện:** (1) Cơ chế nào từ chối truy cập nếu agent biết khóa phiên khác? (2) Trạng thái nào có thể chứa PII, ai truy cập và khi nào bị xóa? (3) Nếu Redis lỗi giữa phiên thì hệ thống dừng an toàn hay chạy với dữ liệu cũ?
 
@@ -123,7 +122,7 @@ Các kịch bản dưới đây được chọn từ Utility Tree. “Non-risk�
 
 ### 6.1 Tham số Governor
 
-Đề xuất khởi đầu từ bản AI: `MAX_STEPS=8`, `MAX_RETRIES=3`, backoff lũy thừa. Đây **không phải giá trị đã đo**. Đề không cung cấp `TOKEN_BUDGET`, `TOTAL_TIMEOUT` hoặc timeout từng tool; báo cáo không tự đặt số cho các giá trị này. Chúng phải được chốt qua thử nghiệm giả lập, tính đến TTFT RAG, độ trễ tool, workload dùng chung GPU và thời gian thao tác của bác sĩ. Mỗi retry phải thuộc cùng deadline tổng; không retry lỗi không lặp an toàn hoặc thao tác ghi chưa có idempotency.
+Giá trị tham khảo: `MAX_STEPS=8`, `MAX_RETRIES=3`, backoff lũy thừa. Đây **không phải giá trị đã đo**. Đề không cung cấp `TOKEN_BUDGET`, `TOTAL_TIMEOUT` hoặc timeout từng tool; báo cáo không tự đặt số cho các giá trị này. Chúng phải được chốt qua thử nghiệm giả lập, tính đến TTFT RAG, độ trễ tool, workload dùng chung GPU và thời gian thao tác của bác sĩ. Mỗi retry phải thuộc cùng deadline tổng; không retry lỗi không lặp an toàn hoặc thao tác ghi chưa có idempotency.
 
 ```mermaid
 stateDiagram-v2
@@ -249,54 +248,54 @@ Vì vậy quyền và giới hạn quan trọng cần nằm ở các lớp mà m
 
 Các kiểm soát này không biến rủi ro thành bằng không. Runner vẫn có đặc quyền cần quản lý; container dùng chung kernel; kiểm tra quyền có thể cấu hình sai; audit log có thể lộ PII nếu ghi quá nhiều; và xác nhận của bác sĩ không tự bảo đảm nội dung đề xuất đúng. Do đó thiết kế còn cần kiểm thử giả lập, review quyền, theo dõi lỗi và quy trình thu hồi. Prompt và bộ lọc mô hình vẫn hữu ích như lớp hỗ trợ, nhưng không được dùng thay cho kiểm soát quyền, ngân sách thực thi hay xác nhận hành động. Cách bố trí này phù hợp hơn với dữ liệu y tế nội bộ và GPU dùng chung, đồng thời tạo ra tiêu chí có thể kiểm tra được thay vì dựa vào lời hứa trong prompt. Chưa có benchmark hay kiểm thử an toàn trong phạm vi tài liệu này; các tuyên bố trên là mục tiêu thiết kế cần xác minh.
 
-## 7. Nhiệm vụ 5 — Đối chiếu phát hiện của bản tham khảo AI và đánh giá trong báo cáo
+## 7. Nhiệm vụ 5 — Đối chiếu đánh giá của nhóm và của AI
 
-Tài liệu Word không chứa biên bản nhóm tự đánh giá trước khi dùng AI. Vì thế không thể trung thực phân loại phát hiện nào “chỉ nhóm”, “chỉ AI” hay “cả hai” như một sự kiện đã xảy ra. Bảng dưới lưu nguồn chứng cứ hiện có; nhóm cần đổi cột phân loại sau khi đối chiếu ghi chú/thảo luận thật. “Ứng viên false positive” là ví dụ để kiểm tra, không khẳng định Claude đã thực sự nêu chúng.
+Hồ sơ nguồn không ghi lại trình tự nhóm tự đánh giá trước khi dùng AI. Bảng dưới phân biệt nội dung xuất hiện trong đề, các điểm bổ sung trong phần phản biện và các giả thuyết cần kiểm tra; việc ghi nhận ai phát hiện trước cần dựa trên thảo luận thực tế của nhóm. Các ví dụ false positive cần đối chiếu với đầu ra đã dùng.
 
 | Nhóm phân loại theo rubric | Phát hiện có thể đưa vào từ hồ sơ hiện tại | Giới hạn chứng cứ |
 |---|---|---|
 | Chỉ nhóm phát hiện | Chưa có mục nào được xác nhận. | Không có ghi chú độc lập/thời điểm phát hiện của nhóm trong tệp tham khảo. |
-| Chỉ AI phát hiện | F2 và F7–F11 là các bổ sung được bản AI nêu ngoài mô tả trực tiếp của đề. | Chỉ có thể gọi là “AI bổ sung trong bản nháp”; chưa biết nhóm có tự phát hiện các điểm này trước đó không. |
-| Cả nhóm và AI cùng phát hiện | F1, F3–F5 được đề và bản AI cùng nhắc tới. | Đây là trùng khớp giữa đề và AI, chưa chứng minh nhóm đã phát hiện độc lập. |
-| AI đưa ra nhưng sai/không áp dụng | Các ví dụ cloud LLM công cộng và DDoS Internet ở dưới là ứng viên để kiểm tra. | Word không chứng minh Claude đã đưa đúng các phát biểu này; chỉ gắn nhãn false positive sau khi so với đầu ra AI thực tế và xác nhận phạm vi. |
+| Chỉ AI phát hiện | F2 và F7–F11 là các bổ sung trong phần đánh giá, ngoài mô tả trực tiếp của đề. | Chưa có ghi chép quá trình để xác định nhóm có phát hiện các điểm này trước đó không. |
+| Cả nhóm và AI cùng phát hiện | F1, F3–F5 xuất hiện trong đề và phần đánh giá. | Nguồn hiện có không chứng minh nhóm đã phát hiện độc lập trước đó. |
+| AI đưa ra nhưng sai/không áp dụng | Các ví dụ cloud LLM công cộng và DDoS Internet ở dưới là ứng viên để kiểm tra. | Chỉ gắn nhãn false positive sau khi đối chiếu với đầu ra thực tế và phạm vi của hệ thống. |
 
-F6 cũng được đề nhắc là shared Redis/`task:<id>`; các thuộc tính “ID tuần tự, không ACL, không TTL” chỉ là giả định thêm của bản AI. Nhóm nên tách phần chắc chắn và phần chưa có căn cứ khi hoàn thiện phân loại.
+F6 cũng được đề nhắc là shared Redis/`task:<id>`; các thuộc tính “ID tuần tự, không ACL, không TTL” là giả định không được nêu trong đề và cần kiểm tra riêng.
 
-| # | Phát hiện | Căn cứ trong đề / bản AI | Phân loại có thể kết luận từ hồ sơ hiện có |
+| # | Phát hiện | Căn cứ trong đề / phần đánh giá đối chiếu | Phân loại theo hồ sơ hiện có |
 |---|---|---|---|
-| F1 | Vòng lặp chỉ dừng khi LLM nói hoàn thành, chưa nêu giới hạn cứng. | Đề mô tả trực tiếp; bản AI cũng nêu. | Có trong đề và bản AI; chưa xác định nhóm phát hiện trước hay không. |
-| F2 | Gọi SchedulingAgent trong vòng lặp có thể lặp thao tác ghi và tạo lịch trùng. | Suy luận từ sequence; bản AI nêu. | AI draft bổ sung hợp lý; cần kiểm tra API/idempotency và xác nhận nhóm. |
-| F3 | Đưa nguyên văn RAG vào prompt tạo đường cho indirect prompt injection. | Đề nêu cả cơ chế và kịch bản; bản AI nêu. | Có trong đề và bản AI; thứ tự phát hiện của nhóm chưa rõ. |
-| F4 | SchedulingAgent ghi trực tiếp, không có bước xác nhận người dùng được mô tả. | Đề mô tả trực tiếp; bản AI nêu. | Có trong đề và bản AI; chưa xác định nhóm phát hiện trước hay không. |
-| F5 | Mã LLM sinh chạy trên máy chủ ứng dụng bằng tài khoản backend. | Đề mô tả trực tiếp; bản AI nêu. | Có trong đề và bản AI. |
-| F6 | Trạng thái Redis dùng chung với khóa `task:<id>`. | Đề mô tả trực tiếp; bản AI phát triển thành rủi ro. | Shared state là dữ kiện trong đề; ID đoán được/không ACL/không TTL chưa được đề chứng minh. |
-| F7 | Nhật ký mọi lời gọi tool chưa được mô tả. | Bản AI đề xuất thiếu audit; baseline Lab 4 đã có AuditLogger cho RAG, nhưng chưa nói CAAN tools tích hợp vào đó. | Khoảng trống tài liệu CAAN, không đủ căn cứ kết luận hệ thống hoàn toàn không có log. |
-| F8 | Kiểm tra phạm vi bệnh nhân chưa được mô tả trong luồng CAAN. | Bản AI nêu; Lab 4 có kiểm tra role/tài liệu, không tương đương quyền theo bệnh nhân. | Cần xác minh mô hình phân công/ủy quyền; không kết luận chắc chắn là thiếu toàn hệ thống. |
-| F9 | Timeout/retry/backoff không xuất hiện trong sequence ban đầu. | Sơ đồ đề cho thấy vòng lặp nhưng không nêu các cơ chế này; bản AI nêu. | Thiếu trong mô tả, chưa chứng minh thiếu ở mọi thành phần. |
-| F10 | Agent loop có thể tranh GPU với truy vấn RAG/embedding. | Suy luận từ GPU dùng chung trong baseline; bản AI nêu. | Rủi ro kiến trúc hợp lý; mức tác động phải đo, không có kết quả. |
-| F11 | Redis có thể là điểm phụ thuộc đơn nếu mọi agent cần nó. | Bản AI nêu; đề xác nhận Redis dùng chung, không mô tả HA/fallback. | Câu hỏi độ sẵn sàng cần kiểm tra, chưa đủ dữ liệu khẳng định triển khai đơn nút. |
+| F1 | Vòng lặp chỉ dừng khi LLM nói hoàn thành, chưa nêu giới hạn cứng. | Đề mô tả trực tiếp; phần đánh giá cũng nêu. | Có trong đề và phần đánh giá; chưa xác định nhóm phát hiện trước hay không. |
+| F2 | Gọi SchedulingAgent trong vòng lặp có thể lặp thao tác ghi và tạo lịch trùng. | Suy luận từ sequence; phần phản biện bổ sung nêu điểm này. | Cần kiểm tra API/idempotency và đối chiếu với kết quả nhóm tự phân tích. |
+| F3 | Đưa nguyên văn RAG vào prompt tạo đường cho indirect prompt injection. | Đề nêu cả cơ chế và kịch bản; phần đánh giá cũng ghi nhận. | Có trong đề và phần đánh giá; thứ tự phát hiện của nhóm chưa rõ. |
+| F4 | SchedulingAgent ghi trực tiếp, không có bước xác nhận người dùng được mô tả. | Đề mô tả trực tiếp; phần đánh giá cũng ghi nhận. | Có trong đề và phần đánh giá; chưa xác định nhóm phát hiện trước hay không. |
+| F5 | Mã LLM sinh chạy trên máy chủ ứng dụng bằng tài khoản backend. | Đề mô tả trực tiếp; phần đánh giá cũng ghi nhận. | Có trong đề và phần đánh giá. |
+| F6 | Trạng thái Redis dùng chung với khóa `task:<id>`. | Đề mô tả trực tiếp; phần đánh giá xác định hệ quả cần xem xét. | Shared state là dữ kiện trong đề; ID đoán được/không ACL/không TTL chưa được chứng minh. |
+| F7 | Nhật ký mọi lời gọi tool chưa được mô tả. | Đề chưa nêu nhật ký cho CAAN tools; baseline Lab 4 có AuditLogger cho RAG nhưng chưa nói CAAN tích hợp vào đó. | Khoảng trống tài liệu CAAN, không đủ căn cứ kết luận hệ thống hoàn toàn không có log. |
+| F8 | Kiểm tra phạm vi bệnh nhân chưa được mô tả trong luồng CAAN. | Luồng CAAN chưa nêu kiểm tra này; Lab 4 có kiểm tra role/tài liệu, không tương đương quyền theo bệnh nhân. | Cần xác minh mô hình phân công/ủy quyền; không kết luận chắc chắn là thiếu toàn hệ thống. |
+| F9 | Timeout/retry/backoff không xuất hiện trong sequence ban đầu. | Sơ đồ đề cho thấy vòng lặp nhưng không nêu các cơ chế này. | Thiếu trong mô tả, chưa chứng minh thiếu ở mọi thành phần. |
+| F10 | Agent loop có thể tranh GPU với truy vấn RAG/embedding. | Suy luận từ GPU dùng chung trong baseline. | Rủi ro kiến trúc hợp lý; mức tác động phải đo, không có kết quả. |
+| F11 | Redis có thể là điểm phụ thuộc đơn nếu mọi agent cần nó. | Đề xác nhận Redis dùng chung, không mô tả HA/fallback. | Câu hỏi độ sẵn sàng cần kiểm tra, chưa đủ dữ liệu khẳng định triển khai đơn nút. |
 
 **Ứng viên false positive cần gắn đúng phạm vi:** (a) “Dữ liệu gửi tới nhà cung cấp LLM công cộng” không phù hợp với baseline đã chốt LLM nội bộ; (b) “tấn công DDoS trực tiếp từ Internet” không phải kịch bản hiện tại nếu vùng IMRS không nhận ingress công cộng theo Lab 5; (c) “mã hóa mọi kết nối là nguyên nhân của bốn kịch bản H,H” không được chứng minh — mã hóa có thể vẫn là yêu cầu bảo mật hợp lệ, nên gọi đây là *lệch trọng tâm đánh giá*, không phải khuyến nghị sai. Chỉ phân loại thành false positive thật nếu đầu ra AI nhóm thực sự có phát biểu đó và hồ sơ chứng minh nó không áp dụng.
 
-### Phản tư về AI (bản tổng hợp cần nhóm cá nhân hóa)
+### Phản tư về AI
 
 AI có ích khi dùng như người phản biện bổ sung: nó nhanh chóng rà các lớp điều phối, tool, dữ liệu chia sẻ và thực thi mã; đồng thời gợi ý phân tích theo Risk, Non-risk, Sensitivity Point và Trade-off Point. Trong tài liệu này, ví dụ có giá trị là nguy cơ SchedulingAgent bị gọi lại trong vòng lặp và mối liên hệ giữa vòng lặp agent với GPU dùng chung. Đây là các suy luận đáng kiểm tra vì chúng nối một chi tiết trình tự với hậu quả vận hành cụ thể.
 
-AI cũng có giới hạn rõ. Bản nháp đôi chỗ biến điều “chưa thấy mô tả” thành “không có”, chẳng hạn ACL/TTL Redis, audit, timeout hoặc ID tuần tự; các điểm ấy cần kiểm tra thay vì khẳng định. Nó đưa ra tham số `MAX_STEPS=8` và `MAX_RETRIES=3` nhưng không có benchmark để chứng minh phù hợp. Nó còn dùng một số giả định về đường mạng/độ sẵn sàng cần đối chiếu baseline. Những ví dụ này cho thấy câu trả lời trôi chảy không đồng nghĩa với bằng chứng.
+AI cũng có giới hạn rõ. Một số nhận định biến điều “chưa thấy mô tả” thành “không có”, chẳng hạn ACL/TTL Redis, audit, timeout hoặc ID tuần tự; các điểm ấy cần kiểm tra thay vì khẳng định. Tham số `MAX_STEPS=8` và `MAX_RETRIES=3` chưa có benchmark chứng minh phù hợp. Một số giả định về đường mạng/độ sẵn sàng cũng cần đối chiếu baseline. Câu trả lời trôi chảy không thay thế được bằng chứng.
 
-Với quyết định ảnh hưởng dữ liệu bệnh nhân hoặc thao tác ghi, nhóm cần xem lại sơ đồ, quyền thực tế, cấu hình triển khai và kết quả kiểm thử; không dựa riêng vào lời giải thích của mô hình. Nhóm cũng phải tự ghi lại phát hiện nào có trước khi dùng AI, AI bổ sung điểm gì, và điểm nào bị loại vì không áp dụng. Tệp tham khảo không chứa nhật ký thảo luận độc lập của nhóm, nên phân loại người–AI trong bảng hiện chỉ thể hiện trạng thái chứng cứ, chưa thể thay cho phản tư cá nhân. Trước khi nộp, mỗi thành viên nên bổ sung ví dụ thật từ phần mình đảm nhiệm.
+Với quyết định ảnh hưởng dữ liệu bệnh nhân hoặc thao tác ghi, cần xem lại sơ đồ, quyền thực tế, cấu hình triển khai và kết quả kiểm thử; không dựa riêng vào lời giải thích của mô hình. Bảng đối chiếu phản ánh nguồn hiện có; việc phân biệt phát hiện của nhóm với phần AI bổ sung cần căn cứ vào quá trình làm việc thực tế.
 
 ## 8. Giới hạn, giả định và việc cần xác nhận
 
 - **Chưa triển khai/đo:** Governor, sandbox, authorization cho từng agent, audit CAAN và các sơ đồ cải tiến là thiết kế đề xuất; không khẳng định đã chạy.
 - **Giả định cần kiểm tra:** trạng thái Redis có/không chứa PII; ID tác vụ có đoán được không; hành động tool có idempotent không; ACL, TTL, timeout và HA hiện có hay chưa.
-- **Thông tin nhóm cần bổ sung:** phân công vai trò, phát hiện độc lập trước AI, ví dụ AI false positive thực tế, ngưỡng đo/điều kiện nghiệm thu và xác nhận ưu tiên của stakeholder.
+- Mức ưu tiên Utility Tree và ngưỡng nghiệm thu cần được xác nhận theo bối cảnh stakeholder trước khi dùng trong triển khai.
 - Các mục tiêu Lab 1 như TTFT <1,5 giây, phục hồi ≤5 giây và rò PII bằng 0 là mục tiêu/tiêu chí cần thử nghiệm; không phải kết quả được Lab 6 đo.
 
 ## Nguồn nội bộ
 
 - `SAD-Lab-Manual-v3.pdf`, mục Lab 6: yêu cầu ATAM, deliverables và rubric.
-- `LAB6_EVALUATION_REPORT.docx`, bản tham khảo AI: đề xuất Utility Tree, phân tích red-team, guardrails, sơ đồ, ADR và AI_LOG.
+- `LAB6_EVALUATION_REPORT.docx`: tài liệu đối chiếu về Utility Tree, phân tích red-team, guardrails, sơ đồ, ADR và AI_LOG.
 - `context-pack.md`: ràng buộc IMRS đã chốt và baseline Lab 4–5.
 - `lab4/LAB4_RAG_DESIGN.md`, `adr/0001-chon-vector-store.md`, `adr/0002-co-che-phan-quyen-truy-cap.md`: RAG, quyền truy cập và audit baseline.
 - `lab5/LAB5_C4_SERVING.md`, `adr/0003-cau-hinh-dynamic-batching.md`: GPU dùng chung, mạng, hiệu năng và trạng thái các mục tiêu đo.

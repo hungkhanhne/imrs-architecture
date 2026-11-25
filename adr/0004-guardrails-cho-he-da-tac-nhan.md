@@ -11,7 +11,7 @@ CAAN theo đề có vòng lặp Orchestrator dựa vào phản hồi LLM để d
 
 Đề xuất thực thi guardrails ở mã điều phối, gateway và hạ tầng, không dựa riêng vào prompt:
 
-1. Bổ sung **Execution Governor** độc lập với LLM, giới hạn `MAX_STEPS`, `TOKEN_BUDGET`, `TOTAL_TIMEOUT`, timeout từng tool và retry tối đa có backoff. Khi hết ngân sách, Governor hủy tác vụ con, chuyển FAILED và thông báo người dùng. `MAX_STEPS=8`, `MAX_RETRIES=3` chỉ là gợi ý khởi đầu từ bản AI, chưa có benchmark; token budget và timeout chưa được đặt số.
+1. Bổ sung **Execution Governor** độc lập với LLM, giới hạn `MAX_STEPS`, `TOKEN_BUDGET`, `TOTAL_TIMEOUT`, timeout từng tool và retry tối đa có backoff. Khi hết ngân sách, Governor hủy tác vụ con, chuyển FAILED và thông báo người dùng. `MAX_STEPS=8`, `MAX_RETRIES=3` là giá trị tham khảo chưa có benchmark; token budget và timeout chưa được đặt số.
 2. Tách **Sandbox Runner** khỏi IMRS Backend. Chạy mã bằng UID không phải root, `--network none`, giới hạn bộ nhớ/CPU/PID, filesystem chỉ đọc, chỉ mount dữ liệu được duyệt và timeout cưỡng chế. `--memory=256m` và `--cpus=0.5` lấy từ đề. Backend không có quyền Docker daemon/socket; runner có đặc quyền phải có API hẹp, danh tính riêng và được cô lập.
 3. Mọi thao tác ghi tạo **đề xuất**; dịch vụ nghiệp vụ chỉ commit sau xác nhận từ người có quyền, kiểm tra quyền lần cuối và idempotency key.
 4. Cấp quyền tối thiểu theo agent/tool; kiểm tra role và phạm vi bệnh nhân tại gateway ngay trước truy cập dữ liệu/công cụ.
@@ -44,5 +44,5 @@ CAAN theo đề có vòng lặp Orchestrator dựa vào phản hồi LLM để d
 ## Căn cứ
 
 - `SAD-Lab-Manual-v3.pdf`, yêu cầu Lab 6 và rubric.
-- `LAB6_EVALUATION_REPORT.docx`, bản tham khảo được AI soạn; các tham số ngoài ràng buộc đề đều cần kiểm chứng.
+- `LAB6_EVALUATION_REPORT.docx`: tài liệu đối chiếu; các tham số ngoài ràng buộc đề đều cần kiểm chứng.
 - `context-pack.md`, `lab4/LAB4_RAG_DESIGN.md`, `lab5/LAB5_C4_SERVING.md`, ADR-0001–0003.

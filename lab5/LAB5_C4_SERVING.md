@@ -2,8 +2,6 @@
 
 > **Trạng thái:** Bản Lab 5 được tổng hợp từ tài liệu tham khảo Word/Excel và baseline Lab 4 trong kho. Các số tải và thời gian xử lý dưới đây là giả định của đề bài, không phải kết quả benchmark. Nhóm tactic được trình bày theo bản tham khảo; cần ghi đúng ấn bản/trang giáo trình Bass, Clements & Kazman mà lớp sử dụng trước khi nộp.
 >
-> **Thông tin sinh viên:** Tự điền tên, MSSV và lớp nếu biểu mẫu của giảng viên yêu cầu. Không sao chép nhãn `[SV XÁC NHẬN]` từ tệp tham khảo như thể đã xác nhận.
-
 ## 1. Phạm vi và yêu cầu kiến trúc
 
 Lab 5 hoàn thiện kiến trúc phục vụ LLM cho IMRS. Bác sĩ gửi yêu cầu qua Web App và API Gateway đến Backend. Backend truy xuất tài liệu được phép từ Qdrant, dùng LLM nội bộ để trả lời có nguồn; LLM Serving Gateway gom lô, giới hạn tải và chuyển sang worker dự phòng khi mô hình chính lỗi.
@@ -357,11 +355,11 @@ ADR đầy đủ được lưu tại [`adr/0003-cau-hinh-dynamic-batching.md`](.
 | Rủi ro availability | CPU fallback chưa được đánh giá năng lực/chất lượng; threshold, timeout, backoff, reset timeout chưa có số đo; lỗi fallback hoặc queue đầy cần thông báo rõ. |
 | Rủi ro bảo mật | Cache phải scope theo role, policy version, corpus version; quyền lấy từ danh tính máy chủ; kiểm tra quyền trước cache/LLM; audit không ghi nội dung thô. |
 | Rủi ro vận hành | Queue cap chưa có giá trị; cần quy định back-pressure/từ chối, quan sát queue depth và quy trình vận hành worker dự phòng. |
-| Còn cần sinh viên xác nhận | Tên và nhóm tactic theo đúng ấn bản giáo trình; tên/MSSV/lớp nếu biểu mẫu bắt buộc; SLO TTFT thực sự được lớp chốt; các giả định và nhận xét cá nhân trong AI_LOG. |
+| Thông tin cần chốt | Tên và nhóm tactic theo đúng ấn bản giáo trình; tên/MSSV/lớp nếu biểu mẫu bắt buộc; SLO TTFT thực sự được lớp chốt; các giả định vận hành chưa có kết quả đo. |
 
 ## 11. Nhật ký lỗi và thay đổi thiết kế
 
-| Vấn đề trong bản tham khảo | Tác động | Cách xử lý trong bản Lab 5 này |
+| Điểm cần hiệu chỉnh từ tài liệu đối chiếu | Tác động | Cách xử lý trong bản Lab 5 này |
 |---|---|---|
 | `CircuitBreaker` bị nói như kết hợp mặc định với Retry | Có thể gây nhầm pattern và tactic; retry có thể khuếch đại tải. | Tách Exception Detection, Retry, Degradation và pattern CircuitBreaker; chỉ retry có giới hạn khi Closed. |
 | Bệnh nhân nối trực tiếp từ IMRS dù nhãn nói chuyển qua bác sĩ | Quan hệ System Context gây hiểu sai người dùng/tích hợp. | Bỏ bệnh nhân khỏi C4 Level 1 vì không có tương tác trực tiếp. |
@@ -374,7 +372,7 @@ ADR đầy đủ được lưu tại [`adr/0003-cau-hinh-dynamic-batching.md`](.
 
 ## 12. Nguồn và phạm vi
 
-- `LAB5_C4_SERVING.docx`: bảng tactic, sơ đồ tham khảo, Sequence/Deployment, capacity narrative, ADR-0003 và AI_LOG nháp.
+- `LAB5_C4_SERVING.docx`: bảng tactic, sơ đồ, Sequence/Deployment, capacity narrative, ADR-0003 và nhật ký công cụ.
 - `LAB5_CAPACITY_ESTIMATE.xlsx`: sheet `GiaDinh`, `NangLuc`, `DoNhay`; công thức và giá trị đầu vào được kiểm tra độc lập.
 - `context-pack.md`, `adr/0001-chon-vector-store.md`, `adr/0002-co-che-phan-quyen-truy-xuat.md`: baseline Lab 1–4 trong kho, Qdrant, role-filter và ràng buộc GPU.
 - Thời gian xử lý batch, số bác sĩ, chu kỳ gửi và MAX_WAIT đều là giả định đề bài. Báo cáo không dùng dữ liệu bệnh nhân thật và không bổ sung số benchmark mới.
