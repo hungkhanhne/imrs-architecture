@@ -38,3 +38,9 @@ Nạp PDF → trích xuất → chia đoạn → embedding cục bộ → Qdrant
 ## Còn cần xác định
 
 Embedding model/phiên bản, kích thước chunk, top-k, TTL cache, cấu hình Qdrant, queue capacity, SLO và benchmark tải, timeout/threshold của breaker, năng lực Fallback, quy trình cập nhật/thu hồi quyền. Mục tiêu thời gian Lab 1 chưa phải kết quả đo.
+
+## Lab 6 — CAAN
+
+Lab 6 đánh giá tính năng trợ lý đa tác nhân theo đề: Orchestrator lặp theo đầu ra LLM; SummaryAgent dùng RAG; SchedulingAgent ghi trực tiếp; DataAnalysisAgent chạy mã sinh trên máy chủ; các agent dùng chung Redis `task:<id>`. Đây là mô tả thiết kế đề bài, không chứng minh các kiểm soát chưa nêu vắng mặt trong toàn hệ thống. Báo cáo Utility Tree chọn bốn kịch bản (H,H): indirect prompt injection qua PDF, mã Python vượt ranh giới, vòng lặp tool lỗi chiếm tài nguyên và truy cập chéo trạng thái.
+
+Đề xuất Lab 6 là Governor với giới hạn bước/token/deadline, sandbox riêng cho mã, xác nhận người dùng trước mọi thao tác ghi, quyền tối thiểu theo agent/tool, cách ly trạng thái cùng TTL và audit log tối thiểu hóa PII. `MAX_STEPS=8`, `MAX_RETRIES=3` là giá trị gợi ý từ bản AI, chưa benchmark; `TOKEN_BUDGET`/`TOTAL_TIMEOUT` chưa chốt. Không có kết quả triển khai hoặc đo an toàn trong baseline.

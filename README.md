@@ -1,6 +1,6 @@
 # Kho bài thực hành `imrs-architecture`
 
-Kho bài làm dùng chung cho Lab 4-7 của hệ thống IMRS. Lab 4 và Lab 5 được AI hỗ trợ tổng hợp; các giả định, thuật ngữ theo giáo trình và yêu cầu cá nhân cần sinh viên rà soát trước khi nộp.
+Kho bài làm dùng chung cho Lab 4-7 của hệ thống IMRS. Các deliverable Lab 4-6 có AI hỗ trợ tổng hợp; giả định, thuật ngữ theo giáo trình và nội dung phản tư cá nhân cần sinh viên rà soát trước khi nộp.
 
 ## Cấu trúc
 
@@ -12,6 +12,7 @@ adr/
   0001-chon-vector-store.md
   0002-co-che-phan-quyen-truy-xuat.md
   0003-cau-hinh-dynamic-batching.md
+  0004-guardrails-cho-he-da-tac-nhan.md
 lab4/
   LAB4_RAG_DESIGN.md
   images/
@@ -35,8 +36,10 @@ docs/
 - [ADR-0003 - Dynamic Batching](adr/0003-cau-hinh-dynamic-batching.md): cấu hình batch khởi điểm có điều kiện và các rủi ro/đánh đổi.
 - [Lab 5 - C4 và phục vụ mô hình](lab5/LAB5_C4_SERVING.md): tactic mapping, C4 Level 1-3, luồng lỗi, deployment, capacity và quyết định serving.
 - [Báo cáo rà soát bản tham khảo Lab 5](lab5/LAB5_REVIEW_REPORT.md): phát hiện đối chiếu Word/Excel và căn cứ theo section/sheet/cell.
+- [Lab 6 - Đánh giá CAAN theo ATAM rút gọn](lab6/LAB6_EVALUATION_REPORT.md): approaches, Utility Tree, bốn kịch bản red-team, Risk Themes, guardrails, sơ đồ và phản tư.
+- [ADR-0004 - Guardrails CAAN](adr/0004-guardrails-cho-he-da-tac-nhan.md): đề xuất giới hạn vòng lặp, sandbox, xác nhận thao tác ghi và tách trạng thái.
 - [Gói ngữ cảnh](context-pack.md): các ràng buộc Lab 1 và baseline Lab 2-5.
-- [Nhật ký sử dụng AI](AI_LOG.md): tóm tắt hỗ trợ AI và việc sinh viên cần tự rà soát.
+- [Nhật ký sử dụng AI](AI_LOG.md): tóm tắt hỗ trợ AI Lab 4-6 và việc sinh viên cần tự rà soát.
 - [Hồ sơ kiến trúc](docs/SAD.md): bản nền sau Lab 4, sẽ được tổng hợp/cập nhật ở Lab 7.
 
 Tài liệu nguồn PDF/Word của Lab 1-4 được giữ trong thư mục làm việc bên cạnh các deliverable để tra cứu. Bản nộp cuối cần bảo đảm các file tham chiếu và chính sách lưu trữ phù hợp với yêu cầu của lớp.

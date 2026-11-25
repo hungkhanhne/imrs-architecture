@@ -1,4 +1,4 @@
-# Nhật ký sử dụng AI - Lab 4 và Lab 5
+# Nhật ký sử dụng AI - Lab 4, Lab 5 và Lab 6
 
 > Nhật ký này ghi tóm tắt các bước Codex đã hỗ trợ trong workspace, không phải bản ghi tương tác của sinh viên với Claude hoặc công cụ khác. Cột “Đánh giá của sinh viên” hiện là ghi chú gợi ý do AI soạn, cần sinh viên tự kiểm tra và xác nhận trước khi nộp.
 
@@ -26,3 +26,19 @@
 ## Phần sinh viên cần tự hoàn thiện
 
 Thay hoặc xác nhận cột “Đánh giá của sinh viên” bằng nhận xét của chính mình; cập nhật nguồn và chỉnh sửa thực tế; xác nhận các mục tiêu TTFT/khôi phục; rà soát sơ đồ, quyết định D1-D3 và quy định của giảng viên trước khi nộp.
+
+## Lab 6 — Hỗ trợ đọc, phản biện và tổng hợp
+
+> Các dòng dưới ghi việc Codex thực hiện trong workspace khi đọc tài liệu và hoàn thiện bản tổng hợp. Tệp Word Lab 6 là bản nháp do Claude soạn; nội dung đó được xem là ý kiến AI tham khảo, không phải kết quả phân tích độc lập của nhóm. Cột đánh giá của sinh viên cần được cá nhân hóa sau khi nhóm so sánh với ghi chú thảo luận thật.
+
+| # | Công cụ | Mục đích | Yêu cầu đầu vào (tóm tắt) | Kết quả AI | Đánh giá của sinh viên (cần xác nhận) | Chỉnh sửa/đóng góp trong repo |
+|---|---|---|---|---|---|---|
+| 1 | OpenAI Codex | Đọc rubric Lab 6 | Đối chiếu phần Lab 6 trong `SAD-Lab-Manual-v3.pdf` với bản Word. | Xác định 5 nhiệm vụ, 11 lá Utility Tree trong draft, 4 kịch bản H/H, Risk Themes, guardrails, ADR-0004 và tối thiểu 6 mục AI_LOG. | Kiểm tra yêu cầu/điểm rubric và bổ sung phân công nhóm nếu cần. | Tổ chức báo cáo theo nhiệm vụ và rubric. |
+| 2 | OpenAI Codex | Rà baseline kiến trúc | Dùng `context-pack.md`, Lab 4, Lab 5 và ADR-0001–0003. | Xác định Qdrant/role filter, AuditLogger, GPU dùng chung và trạng thái mục tiêu hiệu năng. | Xác nhận ràng buộc còn hiệu lực; không coi mục tiêu là số đo. | Nối CAAN với baseline, phân biệt điều đề nói và phần chưa mô tả. |
+| 3 | OpenAI Codex | Phân loại approaches và xây Utility Tree | Dùng đề CAAN và bảng đề xuất trong Word. | Giữ Orchestrator–Worker, Blackboard, ReAct; tách approach/pattern khỏi công nghệ/kỹ thuật. Giữ 11 kịch bản, hiệu chỉnh U4/U5/U7/U8/U9/U11. | Stakeholder/nhóm xác nhận mức Q/K; bổ sung phát hiện độc lập trước AI. | Viết bảng Utility Tree với điều kiện và thước đo, ghi rõ mức đề xuất chưa được phê duyệt. |
+| 4 | OpenAI Codex | Red-team 4 kịch bản | Phân tích U1, U2, U5, U11 theo mẫu ATAM rút gọn. | Ghi Risks, Non-risks, Sensitivity, Trade-offs và câu hỏi phản biện. | Xác minh quyền, idempotency, phạm vi bệnh nhân, Redis ACL/TTL/HA và timeout trong thiết kế thực tế. | Thêm ranh giới giữa rủi ro chắc chắn và giả định cần kiểm tra. |
+| 5 | OpenAI Codex | Thiết kế guardrails | Ánh xạ Risk Themes sang Governor, sandbox, HITL, least privilege, audit và kiểm soát RAG. | Bổ sung sơ đồ trước/sau, state machine và cấu hình Docker mẫu. | Kiểm tra cấu hình trên hạ tầng đích; các giới hạn ngoài đề cần thử nghiệm. | Không tự đặt `TOKEN_BUDGET`/`TOTAL_TIMEOUT`; giữ MAX_STEPS/MAX_RETRIES là giá trị tham khảo, chưa benchmark. |
+| 6 | OpenAI Codex | Soạn ADR-0004 | Ghi lại bối cảnh, quyết định, phương án, hệ quả và việc còn phải làm. | Đề xuất kiểm soát tất định ngoài LLM và nêu rủi ro còn lại. | Nhóm/stakeholder quyết định trạng thái ADR trước khi xem là được chấp nhận. | Tạo `adr/0004-guardrails-cho-he-da-tac-nhan.md` với trạng thái “Đề xuất”. |
+| 7 | OpenAI Codex | Đối chiếu người–AI và phản tư | So sánh rubric, đề bài và nguồn Word AI; giữ phân biệt xuất xứ phát hiện. | Nhận ra hồ sơ không có biên bản nhóm tự đánh giá trước AI; một số giả định trong draft cần hạ mức chắc chắn. | Chỉ thành viên mới phân loại trung thực “chỉ nhóm/cả hai/chỉ AI” dựa trên quá trình làm thật. | Bảng ghi căn cứ hiện có, các false-positive ứng viên và phản tư cần cá nhân hóa. |
+
+**Giới hạn nhật ký:** đây là nhật ký hỗ trợ của Codex trong repo, không giả làm lịch sử prompt của Claude hoặc trải nghiệm nhóm. Khi nộp, mỗi thành viên cần bổ sung phần đánh giá/phân loại dựa trên việc mình thực sự đã làm.
